@@ -1,0 +1,73 @@
+apply plugin: 'com.android.application'
+
+import org.apache.tools.ant.taskdefs.condition.Os
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
+
+    sourceSets {
+        main {
+            jni.srcDirs = [] //将其设为空就可以了。
+            jniLibs.srcDir 'libs' //设定so库路径
+        }
+
+    }
+
+    defaultConfig {
+        applicationId "com.example.ragnarok.allocrecordtest"
+        minSdkVersion 15
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+    }
+    
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    task ndkBuild(type: Exec) {
+        println("nkdBuild")
+        workingDir file('./') //指明jni文件夹在哪里
+        commandLine getNdkBuildCmd()
+    }
+
+    tasks.withType(JavaCompile) {
+        compileTask -> compileTask.dependsOn ndkBuild
+    }
+
+    task cleanJni(type: Exec) {
+        println("cleanJni")
+        workingDir file('./')
+        commandLine getNdkBuildCmd(), 'clean'
+    }
+
+/*让默认的clean任务依赖于cleanJni*/
+    clean.dependsOn cleanJni
+
+}
+
+def getNdkPath() {
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    def ndkdir = properties.getProperty('ndk.dir', null)
+    if (ndkdir == null)
+        throw new GradleException('NDK location not found. Define location with ndk.dir in the local.properties file.')
+
+    return ndkdir
+}
+
+
+def getNdkBuildCmd() {
+    def ndkbuild = getNdkPath() + "/ndk-build"
+    return ndkbuild
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:23.3.0'
+}
