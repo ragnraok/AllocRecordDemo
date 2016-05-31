@@ -9,11 +9,11 @@ import java.util.TimerTask;
  * Created by ragnarok on 16/5/9.
  */
 public class Main {
-    
+
     public static void main(String[] args) {
         AndroidDebugBridge.init(true);
-        
-        AndroidDebugBridge bridge = AndroidDebugBridge.createBridge("/Users/ragnarok/adt-bundle-mac-x86_64-20131030/sdk/platform-tools/adb", false);
+
+        AndroidDebugBridge bridge = AndroidDebugBridge.createBridge("/path/to/your/adb/command", false);
         while (!bridge.isConnected() && !bridge.hasInitialDeviceList()) {
             try {
                 Thread.sleep(200);
@@ -23,7 +23,7 @@ public class Main {
                 return;
             }
         }
-        
+
         System.out.println("Create bridge finished");
         System.out.println("isConnected: " + bridge.isConnected());
         System.out.println("devices: " + bridge.getDevices().length);
@@ -55,7 +55,7 @@ public class Main {
                     }
                 }
             });
-            
+
             System.out.println("start allocation tracker");
             client.enableAllocationTracker(true);
             new Timer().schedule(new TimerTask() {
@@ -66,10 +66,10 @@ public class Main {
                 }
             }, 3000);
         }
-        
-        
+
+
     }
-    
+
     private static void printAllocationInfo(AllocationInfo allocationInfo) {
         if (allocationInfo != null) {
             StringBuilder printResult = new StringBuilder();
